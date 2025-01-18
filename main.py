@@ -2,7 +2,7 @@ import cv2
 import time
 from deepface import DeepFace
 from collections import defaultdict
-
+from emotionsFunction import happy, angry, unangry
 # Initialize variables
 last_t = time.time()  # Track the start time of the interval
 emotion_counter = defaultdict(int)  # Track emotions in the current interval
@@ -50,10 +50,13 @@ while True:
             most_common_emotion = max(emotion_counter, key=emotion_counter.get)
             print(f"Most common emotion in the last 5 seconds: {most_common_emotion}")
             if most_common_emotion == "angry":
+                print("angry")
                 angry()
             elif prev_emotion == "angry":
+                print("unangry")
                 unangry()
             if most_common_emotion == "happy":
+                print("happy")
                 happy()
             prev_emotion = most_common_emotion
 
