@@ -13,7 +13,7 @@ export const WebcamCapture: React.FC<WebcamCaptureProps> = ({ webcamRef, onEmoti
       <Webcam
         audio={false}
         ref={webcamRef}
-        screenshotFormat="image/Sjpeg"
+        screenshotFormat="image/jpeg"
         width={1920}
         height={1080}
       />

@@ -97,7 +97,7 @@ function App() {
           <div className="bg-white rounded-2xl p-4 shadow-lg flex flex-col w-full">
             <div className="flex-1 overflow-y-auto space-y-4 p-4">
               {messages.map((message, index) => (
-                <ChatMessage key={index} message={message.text} isAI={message.isAI} />
+                <ChatMessage key={index} message={message.text} isAI={message.isAI} emotion={emotion} />
               ))}
             </div>
           </div>
