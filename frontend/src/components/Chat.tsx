@@ -14,11 +14,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isAI }) => {
       <Avatar
         icon={isAI ? <Duck /> : <User />}
         classNames={{
-          base: `${isAI ? 'bg-purple-600' : 'bg-blue-600'}`,
+          base: `${isAI ? 'bg-yellow-600' : 'bg-green-600'}`,
           icon: "text-white/90"
         }}
       />
-      <Card className={`p-4 max-w-[80%] ${isAI ? 'bg-purple-100' : 'bg-blue-100'}`}>
+      <Card className={`p-4 max-w-[80%] ${isAI ? 'bg-yellow-100' : 'bg-green-100'}`}>
         <p>{message}</p>
       </Card>
     </div>
