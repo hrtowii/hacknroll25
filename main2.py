@@ -46,8 +46,8 @@ def get_current_emotion(frame_data):
     # Gets the emotions of the faces
     for (x, y, w, h) in faces:
         face_roi = preprocessed_frame[y:y + h, x:x + w]
-
-        result = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False)
+        print("Face ROI: ", face_roi)
+        result = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False, detector_backend="retinaface", expand_percentage=10)
         curr_emotion = result[0]['dominant_emotion']
 
     # Just replace prev_emotion.txt w/ contents of current emotion var.

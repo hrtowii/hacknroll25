@@ -20,6 +20,7 @@ function App() {
   const [image, setImage] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(true); // Track whether capturing is active
   const webcamRef = useRef<any>(null);
+  const [showImage, setShowImage] = useState(false); // State to control visibility of the captured image
 
   // Capture function to get screenshot from webcam
   const capture = useCallback(() => {
@@ -106,6 +107,9 @@ function App() {
           <div className="flex flex-col gap-4 w-full mt-4">
             <Button onClick={analyzeImage} className="w-full">Analyze Emotion</Button>
             <Button onClick={roastUser} className="w-full">Roast Me</Button>
+            <Button onClick={() => setShowImage(!showImage)} className="w-full">
+              {showImage ? 'Hide Image' : 'Show Image'}
+            </Button>
           </div>
 
           {/* Emotion Display */}
@@ -113,6 +117,14 @@ function App() {
             <h3 className="text-lg font-semibold mb-2">Current Emotion</h3>
             <p className="text-gray-600">{emotion || 'Waiting for emotion detection...'}</p>
           </div>
+
+          {/* Display Captured Image */}
+          {showImage && image && (
+            <div className="bg-white rounded-2xl p-4 shadow-lg w-full mt-4">
+              <h3 className="text-lg font-semibold mb-2">Captured Image</h3>
+              <img src={image} alt="Captured" className="w-full rounded-lg" />
+            </div>
+          )}
         </div>
       </div>
     </NextUIProvider>
