@@ -1,16 +1,17 @@
 import cv2
 import time
 from deepface import DeepFace
-from emotionsFunction import happy
+from collections import defaultdict
 
-timer = 0
-last_t = 0
-last_emo = ""
+# Initialize variables
+last_t = time.time()  # Track the start time of the interval
+emotion_counter = defaultdict(int)  # Track emotions in the current interval
+
 # Load face cascade classifier
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # Start capturing video
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 while True:
     # Capture frame-by-frame
@@ -29,31 +30,32 @@ while True:
         # Extract the face ROI (Region of Interest)
         face_roi = rgb_frame[y:y + h, x:x + w]
 
-
         # Perform emotion analysis on the face ROI
         result = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False)
 
         # Determine the dominant emotion
         emotion = result[0]['dominant_emotion']
-        if last_emo == emotion:
-            now = time.time()
-            dt = now - last_t
-            timer += dt
-            last_t = now
-        elif timer > 5:
-            print("Send command")
-        else:
-            timer = 0
-            last_t = now
-            last_emo = emotion
-
+        emotion_counter[emotion] += 1  # Update the emotion counter
 
         # Draw rectangle around face and label with predicted emotion
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
         cv2.putText(frame, emotion, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
 
+    # Check if 5 seconds have passed
+    now = time.time()
+    if now - last_t >= 5:
+        # Find the most common emotion in the last 5 seconds
+        if emotion_counter:
+            most_common_emotion = max(emotion_counter, key=emotion_counter.get)
+            print(f"Most common emotion in the last 5 seconds: {most_common_emotion}")
+
+        # Reset the emotion counter and timer for the next interval
+        emotion_counter = defaultdict(int)
+        last_t = now
+
     # Display the resulting frame
     cv2.imshow('Real-time Emotion Detection', frame)
+
     # Press 'q' to exit
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
