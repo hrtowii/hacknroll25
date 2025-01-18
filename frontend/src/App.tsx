@@ -32,20 +32,15 @@ function App() {
     }
   }, [webcamRef]);
 
-  // Function to toggle timer
-  const toggleCapture = () => {
-    setIsCapturing(prev => !prev);
-  };
-
   // Effect to handle periodic capturing
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
 
-    if (isCapturing) {
-      timer = setInterval(() => {
-        capture();
-      }, 5000); // Capture every 5 seconds
-    }
+
+    timer = setInterval(() => {
+      capture();
+    }, 5000); // Capture every 5 seconds
+
 
     return () => {
       if (timer) {
@@ -141,10 +136,6 @@ function App() {
                   <img src={image} alt="Captured" style={{ width: '100%', marginTop: '10px' }} />
                 </div>
               )}
-              <Spacer y={1} />
-              <Button onClick={toggleCapture}>
-                {isCapturing ? 'Stop Capture' : 'Start Capture'}
-              </Button>
               <Spacer y={1} />
               <Button onClick={analyzeImage}>Analyze Emotion</Button>
               <Spacer y={1} />
