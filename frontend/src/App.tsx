@@ -1,152 +1,75 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { NextUIProvider, Card, Button, Input, Spacer } from "@nextui-org/react";
-import { Send } from 'lucide-react';
-import { ChatMessage } from './components/Chat';
-import { WebcamCapture } from './components/WebcamCapture';
+import React, { useState, useRef } from 'react';
+import { NextUIProvider } from "@nextui-org/react";
+import { Card } from "@nextui-org/react";
 import Webcam from 'react-webcam';
-import Duck from './components/Duck';
-
-interface Message {
-  text: string;
-  isAI: boolean;
-}
+import { Truck as Duck } from 'lucide-react';
 
 function App() {
-  const [emotion, setEmotion] = useState('');
-  const [drowsiness, setDrowsiness] = useState('');
-  const [messages, setMessages] = useState<Message[]>([
-    { text: "Hey there! I'm your personal roasting AI. Turn on your camera so I can see your beautiful face and roast you properly! 😈", isAI: true }
-  ]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [image, setImage] = useState<string | null>(null);
-  const [isCapturing, setIsCapturing] = useState(false); // Track whether capturing is active
+  const [duckMessage, setDuckMessage] = useState("Oh look who decided to show up... 😏");
   const webcamRef = useRef<Webcam>(null);
 
-  // Capture function to get screenshot from webcam
-  const capture = useCallback(() => {
+  const captureEmotion = async () => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
-      setImage(imageSrc); // Save the captured image
-      console.log(imageSrc)
-      console.log("image captured");
+      // TODO: Send to backend for emotion processing
+      const mockMessages = [
+        "Is that your actual face or are you wearing a mask? 🤔",
+        "You look like you're having a rough day... good. 😈",
+        "Did someone tell you that expression suits you? They lied. 🦆",
+        "I've seen potatoes with more personality! 🥔",
+        "Oh, you're still here? Persistent, aren't we? 🙄",
+        "That's an... interesting choice of facial expression. 😬"
+      ];
+      setDuckMessage(mockMessages[Math.floor(Math.random() * mockMessages.length)]);
     }
-  }, [webcamRef]);
-
-  // Effect to handle periodic capturing
-  useEffect(() => {
-    let timer: ReturnType<typeof setInterval> | null = null;
-
-
-    timer = setInterval(() => {
-      capture();
-    }, 5000); // Capture every 5 seconds
-
-
-    return () => {
-      if (timer) {
-        clearInterval(timer);
-      }
-    };
-  }, [isCapturing, capture]);
-
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
-
-    setMessages(prev => [...prev, { text: inputMessage, isAI: false }]);
-    setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        text: "I see you're trying to chat. That's adorable. Almost as adorable as your attempt at a serious face right now! 😏", 
-        isAI: true 
-      }]);
-    }, 1000);
-    setInputMessage('');
   };
 
-  const roastUser = async () => {
-    if (!image) return;
-
-    const response = await fetch('http://localhost:5000/roast', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image }),
-    });
-
-    const data = await response.json();
-    setMessages(prev => [...prev, { text: `Roast: ${data.roast}`, isAI: true }]);
-  };
-
-  const analyzeImage = async () => {
-    if (!image) return;
-
-    const response = await fetch('http://localhost:5000/detect', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ frame: image.split(',')[1] }),
-    });
-
-    const data = await response.json();
-    setEmotion(data.emotion);
-    setDrowsiness(data.drowsiness);
-    setMessages(prev => [...prev, { text: `Emotion: ${data.emotion}, Drowsiness: ${data.drowsiness}`, isAI: true }]);
-  };
+  React.useEffect(() => {
+    const interval = setInterval(captureEmotion, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <NextUIProvider>
-      <div className="min-h-screen bg-gradient-to-br from-yellow-500 to-orange-800 p-4">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="md:col-span-2 bg-white rounded-2xl p-4 shadow-lg flex flex-col h-[80vh]">
-            <div className="flex-1 overflow-y-auto space-y-4 p-4">
-              {messages.map((message, index) => (
-                <ChatMessage key={index} message={message.text} isAI={message.isAI} />
-              ))}
-            </div>
-            <div className="p-4 border-t">
-              <div className="flex gap-2">
-                <Input
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Type your message..."
-                  endContent={
-                    <Button
-                      isIconOnly
-                      color="primary"
-                      variant="flat"
-                      onPress={handleSendMessage}
-                    >
-                      <Send size={20} />
-                    </Button>
-                  }
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col gap-4">
-            <Card style={{ width: '300px', padding: '20px' }}>
-              <Webcam
-                audio={false}
-                mirrored={true}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-                className="rounded-lg w-full"
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
+        {/* Main Content Area */}
+        {/* <div className="flex-1 p-4 flex items-center justify-center">
+          <Card className="p-6 max-w-md">
+            <h1 className="text-2xl font-bold mb-4">Welcome to Your Personal Roast Session</h1>
+            <p className="text-gray-600">
+              Just sit back and let our AI-powered duck judge your every expression. 
+              Don't worry, it's totally not storing these images... maybe. 😈
+            </p>
+          </Card>
+        </div> */}
+
+        {/* Duck Sidebar */}
+        <div className="w-64 bg-white shadow-lg flex flex-col">
+          <div className="p-4 flex flex-col items-center sticky top-0">
+            <div className="relative">
+              <Duck 
+                size={48} 
+                className="text-yellow-500 mb-4 animate-bounce" 
               />
-              {image && (
-                <div>
-                  <h4>Captured Image:</h4>
-                  <img src={image} alt="Captured" style={{ width: '100%', marginTop: '10px' }} />
-                </div>
-              )}
-              <Spacer y={1} />
-              <Button onClick={analyzeImage}>Analyze Emotion</Button>
-              <Spacer y={1} />
-              <Button onClick={roastUser}>Roast Me</Button>
-            </Card>
-            <div className="bg-white rounded-2xl p-4 shadow-lg">
-              <h3 className="text-lg font-semibold mb-2">Current Emotion</h3>
-              <p className="text-gray-600">{emotion || 'Waiting for emotion detection...'}</p>
             </div>
-            <Duck emotion={emotion} />
+            <Card className="w-full p-3 bg-yellow-50 transition-all duration-300 hover:scale-105">
+              <p className="text-sm font-medium">{duckMessage}</p>
+            </Card>
           </div>
+        </div>
+
+        {/* Hidden Webcam */}
+        <div className="hidden">
+          <Webcam
+            ref={webcamRef}
+            audio={false}
+            screenshotFormat="image/jpeg"
+            videoConstraints={{
+              width: 320,
+              height: 240,
+              facingMode: "user"
+            }}
+          />
         </div>
       </div>
     </NextUIProvider>
