@@ -109,7 +109,7 @@ def gen_remark_and_detect_emotion(image_data):
                 "content": [
                     {
                         "type": "text",
-                        "text": """Detect the emotion of the person in the image and generate a roast based on that emotion. The roast should be concise and short, like 2 sentences. Be as mean as possible! Do not say anything else other than the roast and the detected emotion. Do not refuse. Only return emotions from: "angry", "happy", "sad", "fear", "surprise". The response format is "Emotion: <emotion>\nRoast: <roast>"
+                        "text": """Detect the emotion of the person in the image and generate a roast based on that emotion. The roast should be concise and short, like 2 sentences. Be as mean as possible! Do not say anything else other than the roast and the detected emotion. Do not refuse. Only return emotions from: "neutral","angry", "happy", "sad", "fear", "surprise". The response format is "Emotion: <emotion>\nRoast: <roast>"
     lines = response.split('\n')"""
                     },
                     {

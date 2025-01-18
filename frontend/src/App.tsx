@@ -13,7 +13,6 @@ interface Message {
 
 function App() {
   const [emotion, setEmotion] = useState('');
-  const [drowsiness, setDrowsiness] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     { text: "Hey there! I'm your personal roasting AI. Turn on your camera so I can see your beautiful face and roast you properly! 😈", isAI: true }
   ]);
@@ -22,16 +21,42 @@ function App() {
   const webcamRef = useRef<any>(null);
   const [showImage, setShowImage] = useState(false); // State to control visibility of the captured image
 
-  // Capture function to get screenshot from webcam
+  // Capture function to get screenshot from webcam and analyze the image
   const capture = useCallback(() => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       setImage(imageSrc); // Save the captured image
       console.log("Image captured:", imageSrc);
+      
+      // Call analyzeImage immediately after capturing
+      analyzeImage(imageSrc);
     } else {
       console.error("Webcam ref is not set");
     }
   }, [webcamRef]);
+
+  // Function to analyze the captured image
+  const analyzeImage = async (capturedImage: string) => {
+    try {
+      const response = await fetch(`${BackendUrl}/detect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ frame: capturedImage.split(',')[1] }), // Send only the base64 data without prefix
+      });
+
+      const data = await response.json();
+      console.log(data);
+      setEmotion(data.emotion);
+
+      // Append the emotion and remark to the chat messages
+      setMessages(prev => [
+        ...prev,
+        { text: `Emotion: ${data.emotion}, Remark: ${data.remark}`, isAI: true }
+      ]);
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+    }
+  };
 
   // Effect to handle periodic capturing
   useEffect(() => {
@@ -40,8 +65,8 @@ function App() {
     if (isCapturing) {
       timer = setInterval(() => {
         console.log("Capturing image...");
-        capture();
-      }, 5000); // Capture every 5 seconds
+        capture(); // Capture and analyze the image immediately
+      }, 20000); // Capture every 20 seconds
     }
 
     return () => {
@@ -51,46 +76,11 @@ function App() {
     };
   }, [isCapturing, capture]);
 
-  const roastUser = async () => {
-    if (!image) return;
-
-    const response = await fetch(`${BackendUrl}/roast`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image }),
-    });
-
-    const data = await response.json();
-    setMessages(prev => [...prev, { text: `Roast: ${data.roast}`, isAI: true }]);
-  };
-
-  const analyzeImage = async () => {
-    if (!image) return;
-
-    const response = await fetch(`${BackendUrl}/detect`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ frame: image.split(',')[1] }),
-    });
-
-    const data = await response.json();
-    console.log(data)
-    setEmotion(data.emotion);
-    // setDrowsiness(data.drowsiness);
-
-    // Append the emotion and remark to the chat messages
-    setMessages(prev => [
-      ...prev,
-      { text: `Emotion: ${data.emotion}, Remark: ${data.remark}`, isAI: true }
-    ]);
-  };
-
   return (
     <NextUIProvider>
       <div className="min-h-screen bg-gradient-to-br from-yellow-500 to-orange-800 p-4">
         <div className="flex flex-col items-center gap-4">
-
-          <WebcamCapture webcamRef={webcamRef}/>
+          <WebcamCapture webcamRef={webcamRef} />
           {/* Duck Component */}
           <Duck emotion={emotion} />
 
@@ -105,8 +95,6 @@ function App() {
 
           {/* Buttons to Analyze Image and Roast */}
           <div className="flex flex-col gap-4 w-full mt-4">
-            <Button onClick={analyzeImage} className="w-full">Analyze Emotion</Button>
-            <Button onClick={roastUser} className="w-full">Roast Me</Button>
             <Button onClick={() => setShowImage(!showImage)} className="w-full">
               {showImage ? 'Hide Image' : 'Show Image'}
             </Button>
