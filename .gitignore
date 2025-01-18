@@ -6,3 +6,4 @@ __pycache__/
 tempimg.png
 temp.mp3
 *.pyc
+node_modules

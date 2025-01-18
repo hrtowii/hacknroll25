@@ -8,9 +8,10 @@ from dotenv import load_dotenv
 import os
 import base64
 from texttospeech import speak_text
-from openai import OpenAI
 
 load_dotenv()
+
+current_emotion = None
 
 # Initialize variables
 last_t = time.time()  # Track the start time of the interval
@@ -24,19 +25,11 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fronta
 eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 
 # Start capturing video
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 if os.getenv("OPENROUTER_KEY") is None:
     raise ValueError("Please set the OPENROUTER_KEY environment variable")
 
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.getenv("OPENROUTER_KEY"),
-)
-
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
 
 async def detect_emotion(frame):
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -64,61 +57,64 @@ async def detect_drowsiness(frame):
     global drowsy_counter
 
     # Drowsiness detection parameters
-    CONSECUTIVE_FRAMES = 1
+    CONSECUTIVE_FRAMES = 2
     frame_counter = 0
 
+    # gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    rgb_frame = cv2.cvtColor(gray_frame, cv2.COLOR_GRAY2RGB)
     faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-    for (x, y, w, h) in faces:
-        face_roi = gray_frame[y:y + h, x:x + w]
+    if len(faces) > 1:
+        largest_face = max(faces, key=lambda rect: rect[2] * rect[3])
+        faces = [largest_face]
 
+    for (x, y, w, h) in faces:
+        face_roi = rgb_frame[y:y + h, x:x + w]
+        face_box = (x, y, w, h)
         # Detect eyes
         eyes = eye_cascade.detectMultiScale(face_roi)
 
-        # Check if both eyes are detected
-        if len(eyes) >= 2:
-            frame_counter = 0
-            for (ex, ey, ew, eh) in eyes:
+        # Function to validate if detected eyes are in the upper part of the face
+        def is_eye_in_upper_face(face_box, eye_box):
+            face_x, face_y, face_w, face_h = face_box
+            eye_x, eye_y, eye_w, eye_h = eye_box
+
+            # Define the upper part of the face as the top half
+            upper_face_y_limit = face_y + face_h // 2
+
+            # Check if the eye bounding box is entirely within the upper part of the face
+            return eye_y + eye_h <= upper_face_y_limit
+
+        num_eyes = 0
+
+        for (ex, ey, ew, eh) in eyes:
+            eye_box = (x + ex, y + ey, ew, eh)
+            if is_eye_in_upper_face(face_box, eye_box):
+                num_eyes += 1
                 cv2.rectangle(frame, (x + ex, y + ey), (x + ex + ew, y + ey + eh), (0, 255, 0), 2)
+            else:
+                cv2.rectangle(frame, (x + ex, y + ey), (x + ex + ew, y + ey + eh), (0, 0, 255), 2)
+
+        print(f"num eyes: {num_eyes}")
+        # Check if both eyes are detected
+        if num_eyes >= 2:
+            frame_counter = 0
         else:
             frame_counter += 1
             if frame_counter >= CONSECUTIVE_FRAMES:
                 cv2.putText(frame, "DROWSINESS ALERT!", (10, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                drowsy_counter += 1
+                # drowsy_counter += 1
 
     return frame
 
 async def handle_emotion(most_common_emotion, prev_emotion, frame):
+    global current_emotion
     if most_common_emotion == "angry":
         print("angry")
         cv2.imwrite('assets/tempimg.png', frame)
-
-        completion = client.chat.completions.create(
-            model="meta-llama/llama-3.2-11b-vision-instruct:free",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "Generate a roast of the person in the image that is meant to be spoken out loud. Do not hold back, be as mean as possible! Keep it concise and short. Like 2 sentences."
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{encode_image('assets/tempimg.png')}"
-                            }
-                        }
-                    ]
-                }
-            ]
-        )
-        print(completion.choices[0].message.content)
-        if completion.choices[0].message.content != "" and completion.choices[0].message.content != "I cannot help with that request.":
-            audio = f'''{completion.choices[0].message.content}'''
-            # speak_text(audio)
         angry()
     elif prev_emotion == "angry":
         print("unangry")
@@ -129,6 +125,8 @@ async def handle_emotion(most_common_emotion, prev_emotion, frame):
     elif most_common_emotion == "sad":
         print("sad")
         sad()
+
+    current_emotion = most_common_emotion
 
 async def handle_drowsiness():
     global drowsy_counter, prev_drowsy_state
@@ -178,6 +176,24 @@ async def main():
 
     cap.release()
     cv2.destroyAllWindows()
+
+# for flask
+import numpy as np
+def get_current_emotion(frame_data):
+    frame = cv2.imdecode(np.frombuffer(base64.b64decode(frame_data), dtype=np.uint8), cv2.IMREAD_COLOR)
+
+    # Run emotion and drowsiness detection
+    emotion = asyncio.run(detect_emotion(frame))
+    drowsiness = asyncio.run(detect_drowsiness(frame))
+
+    # Handle responses
+    response = {
+        'emotion': emotion,
+        'drowsiness': drowsiness,
+        'message': handle_emotion(emotion),
+        'alert': handle_drowsiness(drowsiness)
+    }
+    return response
 
 if __name__ == "__main__":
     asyncio.run(main())
