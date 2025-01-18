@@ -1,5 +1,5 @@
 from openai import OpenAI
-import simpleaudio
+import vlc
 client = OpenAI(base_url="https://api.kokorotts.com/v1", api_key="not-needed")
 def speak_text(text: str):
     print(f"generating audio: {text}")
@@ -10,9 +10,6 @@ def speak_text(text: str):
         response_format="mp3"
     )
     response.stream_to_file("temp.mp3")
-    wave_object = simpleaudio.WaveObject.from_wave_file('temp.mp3')
-    print('playing sound using simpleaudio')
-
-    # define an object to control the play
-    play_object = wave_object.play()
-    play_object.wait_done()
+    p = vlc.MediaPlayer("temp.mp3")
+    p.play()
+    return None

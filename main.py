@@ -6,7 +6,6 @@ from emotionsFunction import happy, angry, unangry
 from dotenv import load_dotenv
 import os
 import base64
-
 from texttospeech import speak_text
 load_dotenv()
 # Initialize variables
@@ -86,7 +85,7 @@ while True:
                       "content": [
                         {
                           "type": "text",
-                          "text": "Generate a roast of the person in the image that is meant to be spoken out loud. Do not hold back, be as mean as possible! Keep it concise and short, spoken within 10 seconds."
+                          "text": "Generate a roast of the person in the image that is meant to be spoken out loud. Do not hold back, be as mean as possible! Keep it concise and short. Like 2 sentences."
                         },
                         {
                           "type": "image_url",
@@ -99,7 +98,7 @@ while True:
                   ]
                 )
                 print(completion.choices[0].message.content)
-                if completion.choices[0].message.content != "":
+                if completion.choices[0].message.content != "" and completion.choices[0].message.content != "I cannot help with that request.":
                     audio = f'''{completion.choices[0].message.content}'''
                     speak_text(audio)
                 angry()
