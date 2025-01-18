@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { NextUIProvider } from "@nextui-org/react";
-import { Button, Input } from "@nextui-org/react";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { NextUIProvider, Card, Button, Input, Spacer } from "@nextui-org/react";
 import { Send } from 'lucide-react';
 import { ChatMessage } from './components/Chat';
 import { WebcamCapture } from './components/WebcamCapture';
+import Webcam from 'react-webcam';
+import Duck from './components/Duck';
 
 interface Message {
   text: string;
@@ -11,25 +12,23 @@ interface Message {
 }
 
 function App() {
-<<<<<<< Updated upstream
+  const [emotion, setEmotion] = useState('');
+  const [drowsiness, setDrowsiness] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     { text: "Hey there! I'm your personal roasting AI. Turn on your camera so I can see your beautiful face and roast you properly! 😈", isAI: true }
   ]);
   const [inputMessage, setInputMessage] = useState('');
-=======
-  const [emotion, setEmotion] = useState('');
-  const [drowsiness, setDrowsiness] = useState('');
-  const [messages, setMessages] = useState<string[]>([]);
   const [image, setImage] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false); // Track whether capturing is active
-  const webcamRef = React.useRef<Webcam>(null);
+  const webcamRef = useRef<Webcam>(null);
 
   // Capture function to get screenshot from webcam
-  const capture = React.useCallback(() => {
+  const capture = useCallback(() => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       setImage(imageSrc); // Save the captured image
-      console.log("image captured")
+      console.log(imageSrc)
+      console.log("image captured");
     }
   }, [webcamRef]);
 
@@ -42,9 +41,11 @@ function App() {
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
 
-    timer = setInterval(() => {
-      capture();
-    }, 5000); // Capture every 5 seconds
+    if (isCapturing) {
+      timer = setInterval(() => {
+        capture();
+      }, 5000); // Capture every 5 seconds
+    }
 
     return () => {
       if (timer) {
@@ -52,7 +53,6 @@ function App() {
       }
     };
   }, [isCapturing, capture]);
->>>>>>> Stashed changes
 
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
@@ -67,7 +67,34 @@ function App() {
     setInputMessage('');
   };
 
-<<<<<<< Updated upstream
+  const roastUser = async () => {
+    if (!image) return;
+
+    const response = await fetch('http://localhost:5000/roast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image }),
+    });
+
+    const data = await response.json();
+    setMessages(prev => [...prev, { text: `Roast: ${data.roast}`, isAI: true }]);
+  };
+
+  const analyzeImage = async () => {
+    if (!image) return;
+
+    const response = await fetch('http://localhost:5000/detect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ frame: image.split(',')[1] }),
+    });
+
+    const data = await response.json();
+    setEmotion(data.emotion);
+    setDrowsiness(data.drowsiness);
+    setMessages(prev => [...prev, { text: `Emotion: ${data.emotion}, Drowsiness: ${data.drowsiness}`, isAI: true }]);
+  };
+
   return (
     <NextUIProvider>
       <div className="min-h-screen bg-gradient-to-br from-yellow-500 to-orange-800 p-4">
@@ -100,57 +127,38 @@ function App() {
             </div>
           </div>
           <div className="flex flex-col gap-4">
-            <WebcamCapture />
+            <Card style={{ width: '300px', padding: '20px' }}>
+              <Webcam
+                audio={false}
+                mirrored={true}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+                className="rounded-lg w-full"
+              />
+              {image && (
+                <div>
+                  <h4>Captured Image:</h4>
+                  <img src={image} alt="Captured" style={{ width: '100%', marginTop: '10px' }} />
+                </div>
+              )}
+              <Spacer y={1} />
+              <Button onClick={toggleCapture}>
+                {isCapturing ? 'Stop Capture' : 'Start Capture'}
+              </Button>
+              <Spacer y={1} />
+              <Button onClick={analyzeImage}>Analyze Emotion</Button>
+              <Spacer y={1} />
+              <Button onClick={roastUser}>Roast Me</Button>
+            </Card>
             <div className="bg-white rounded-2xl p-4 shadow-lg">
               <h3 className="text-lg font-semibold mb-2">Current Emotion</h3>
-              <p className="text-gray-600">Waiting for emotion detection...</p>
+              <p className="text-gray-600">{emotion || 'Waiting for emotion detection...'}</p>
             </div>
+            <Duck emotion={emotion} />
           </div>
         </div>
       </div>
     </NextUIProvider>
-=======
-  const roastUser = async () => {
-    if (!image) return;
-
-    const response = await fetch('http://localhost:5000/roast', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image }),
-    });
-
-    const data = await response.json();
-    setMessages(prev => [...prev, `Roast: ${data.roast}`]);
-  };
-
-  useEffect(() => {
-    console.log('hi');
-  }, []);
-
-  return (
-    <div style={{ display: 'flex', padding: '20px' }}>
-      <Duck emotion={emotion} />
-      <Spacer x={2} />
-      <Card style={{ width: '300px', padding: '20px' }}>
-        <Webcam
-          ref={webcamRef}
-          screenshotFormat="image/jpeg" // Ensure screenshots are captured as images
-        />
-        {image && (
-          <div>
-            <h4>Captured Image:</h4>
-            <img src={image} alt="Captured" style={{ width: '100%', marginTop: '10px' }} />
-          </div>
-        )}
-
-        <Chat messages={messages} />
-        <Spacer y={1} />
-        <Button onClick={analyzeImage}>Analyze Emotion</Button>
-        <Spacer y={1} />
-        <Button onClick={roastUser}>Roast Me</Button>
-      </Card>
-    </div>
->>>>>>> Stashed changes
   );
 }
 
