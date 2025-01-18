@@ -14,8 +14,8 @@ if __name__ == "__main__":
         initial_text="Initial text",
         initial_delay=1000,
         get_new_text_callback=get_new_text_callback,
-        image_path='/Users/ibarahime/dev/hacknroll25/assets/images/logo.png',  # Specify image path
-        image_size=(100, 100)  # Specify image size
+        image_path='./assets/images/logo.png',  # Specify image path
+        image_size=(175,175)  # Specify image size
     )
     overlay.run()
 

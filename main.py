@@ -3,7 +3,7 @@ import time
 import asyncio
 from deepface import DeepFace
 from collections import defaultdict
-from emotionsFunction import happy, angry, unangry
+from emotionsFunction import happy, angry, unangry, sad, sleepy, unsleepy
 from dotenv import load_dotenv
 import os
 import base64
@@ -19,8 +19,11 @@ emotion_counter = defaultdict(int)  # Track emotions in the current interval
 # Load face cascade classifier
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
+# Load eye cascade classifier
+eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
+
 # Start capturing video
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 if os.getenv("OPENROUTER_KEY") is None:
     raise ValueError("Please set the OPENROUTER_KEY environment variable")
@@ -35,6 +38,11 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 async def detect_emotion(frame):
+    # Drowsiness detection parameters
+    EAR_THRESHOLD = 0.25
+    CONSECUTIVE_FRAMES = 2
+    frame_counter = 0
+
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     rgb_frame = cv2.cvtColor(gray_frame, cv2.COLOR_GRAY2RGB)
     faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
@@ -45,12 +53,30 @@ async def detect_emotion(frame):
 
     for (x, y, w, h) in faces:
         face_roi = rgb_frame[y:y + h, x:x + w]
+
+        #detect eyes
+        eyes = eye_cascade.detectMultiScale(face_roi)
+
         result = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False, detector_backend="yolov8")
         emotion = result[0]['dominant_emotion']
         emotion_counter[emotion] += 1
+        print(emotion_counter)
 
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
         cv2.putText(frame, emotion, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+
+        # Check if both eyes are detected
+        if len(eyes) >= 2:
+            frame_counter = 0
+            alarm_triggered = False
+            for (ex, ey, ew, eh) in eyes:
+                cv2.rectangle(frame, (x + ex, y + ey), (x + ex + ew, y + ey + eh), (0, 255, 0), 2)
+        else:
+            frame_counter += 1
+            if frame_counter >= CONSECUTIVE_FRAMES:
+                cv2.putText(frame, "DROWSINESS ALERT!", (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                emotion_counter["drowsy"] += 1
 
     return frame
 
@@ -82,14 +108,23 @@ async def handle_emotion(most_common_emotion, prev_emotion, frame):
         print(completion.choices[0].message.content)
         if completion.choices[0].message.content != "" and completion.choices[0].message.content != "I cannot help with that request.":
             audio = f'''{completion.choices[0].message.content}'''
-            speak_text(audio)
+            # speak_text(audio)
         angry()
     elif prev_emotion == "angry":
         print("unangry")
         unangry()
-    if most_common_emotion == "happy":
+    elif most_common_emotion == "happy":
         print("happy")
         happy()
+    elif most_common_emotion == "sad":
+        print("sad")
+        sad()
+    elif most_common_emotion == "drowsy":
+        print("drowsy")
+        sleepy()
+    elif prev_emotion == "drowsy":
+        print("undrowsy")
+        unsleepy()
 
 async def main():
     global last_t, emotion_counter

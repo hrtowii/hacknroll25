@@ -3,7 +3,7 @@
 import subprocess
 
 def happy():
-    subprocess.Popen('google-chrome-stable https://www.complex.com/tag/sad', shell=True)
+    subprocess.Popen('sudo -u ze2 firefox https://www.complex.com/tag/sad ', shell=True)
     pass
 
 def angry():
