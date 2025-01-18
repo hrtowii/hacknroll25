@@ -6,13 +6,14 @@ import Duck from './Duck';
 interface ChatMessageProps {
   message: string;
   isAI: boolean;
+  emotion: string;
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isAI }) => {
+export const ChatMessage: React.FC<ChatMessageProps> = ({ message, isAI, emotion }) => {
   return (
     <div className={`flex gap-3 ${isAI ? '' : 'flex-row-reverse'}`}>
       <Avatar
-        icon={isAI ? <Duck /> : <User />}
+        icon={isAI ? <Duck emotion={emotion}/> : <User />}
         classNames={{
           base: `${isAI ? 'bg-yellow-600' : 'bg-green-600'}`,
           icon: "text-white/90"
