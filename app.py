@@ -1,7 +1,7 @@
 import base64
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
-from emotionsFunction import angry, gen_remark, happy, sad, unangry
+from emotionsFunction import angry, gen_remark, happy, sad, unangry, sleepy, unsleepy
 from main2 import get_current_emotion, get_prev_emotion
 import numpy
 import json
@@ -26,6 +26,8 @@ def detect():
     match previous_emotion:
         case "angry":
             unangry()
+        case "fear":
+            unsleepy()
 
     match current_emotion:
         case "angry":
@@ -34,6 +36,8 @@ def detect():
             happy()
         case "sad":
             sad()
+        case "fear":
+            sleepy()
 
     remark = gen_remark(current_emotion, frame_data)
 
