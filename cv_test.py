@@ -26,7 +26,11 @@ while True:
     # Detect faces in the frame
     faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-    print(enumerate(faces))
+    print(list(enumerate(faces)))
+    # Isolate only the largest face
+    if len(faces) > 1:
+        largest_face = max(faces, key=lambda rect: rect[2] * rect[3])
+        faces = [largest_face]
 
     for (x, y, w, h) in faces:
         # Extract the face ROI (Region of Interest)

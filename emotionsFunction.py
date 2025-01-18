@@ -13,7 +13,7 @@ def unangry():
     subprocess.run(['sudo', './scripts/angry/unscramble.sh'])
 
 def sleepy():
-    subprocess.run(['./scripts/sleepy/sleepy.sh'])
+    subprocess.run(['sh', './scripts/sleepy/sleepy.sh'])
 
 def unsleepy():
-    subprocess.run(['./scripts/sleepy/unsleepy.sh'])
+    subprocess.run(['sh', './scripts/sleepy/unsleepy.sh'])
