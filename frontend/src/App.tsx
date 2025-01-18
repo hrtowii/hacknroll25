@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { NextUIProvider, Button, Input, Spacer } from "@nextui-org/react";
-import { Send } from 'lucide-react';
+import { NextUIProvider, Button } from "@nextui-org/react";
+import Webcam from 'react-webcam';
 import { ChatMessage } from './components/Chat';
 import Duck from './components/Duck';
 import { BackendUrl } from './utils/BackendUrl';
+import { WebcamCapture } from './components/WebcamCapture';
 
 interface Message {
   text: string;
@@ -16,9 +17,8 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([
     { text: "Hey there! I'm your personal roasting AI. Turn on your camera so I can see your beautiful face and roast you properly! 😈", isAI: true }
   ]);
-  const [inputMessage, setInputMessage] = useState('');
   const [image, setImage] = useState<string | null>(null);
-  const [isCapturing, setIsCapturing] = useState(false); // Track whether capturing is active
+  const [isCapturing, setIsCapturing] = useState(true); // Track whether capturing is active
   const webcamRef = useRef<any>(null);
 
   // Capture function to get screenshot from webcam
@@ -26,8 +26,9 @@ function App() {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       setImage(imageSrc); // Save the captured image
-      console.log(imageSrc)
-      console.log("image captured");
+      console.log("Image captured:", imageSrc);
+    } else {
+      console.error("Webcam ref is not set");
     }
   }, [webcamRef]);
 
@@ -35,9 +36,12 @@ function App() {
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
 
-    timer = setInterval(() => {
-      capture();
-    }, 5000); // Capture every 5 seconds
+    if (isCapturing) {
+      timer = setInterval(() => {
+        console.log("Capturing image...");
+        capture();
+      }, 5000); // Capture every 5 seconds
+    }
 
     return () => {
       if (timer) {
@@ -83,6 +87,8 @@ function App() {
     <NextUIProvider>
       <div className="min-h-screen bg-gradient-to-br from-yellow-500 to-orange-800 p-4">
         <div className="flex flex-col items-center gap-4">
+
+          <WebcamCapture webcamRef={webcamRef}/>
           {/* Duck Component */}
           <Duck emotion={emotion} />
 
