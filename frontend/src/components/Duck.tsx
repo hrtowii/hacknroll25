@@ -15,11 +15,11 @@ const Duck = ({ emotion }: DuckProps) => {
   }, []);
 
   return (
-    <div style={{ width: '175px', height: '175px', overflow: 'hidden' }}>
+    <div style={{ width: '45px', height: '45px', overflow: 'hidden' }}>
       <img
         src={`./assets/images/logo.png`}
         alt="Duck"
-        style={{ transform: `rotate(${rotation}deg)`, height: '90%', width: '90%' }}
+        style={{ transform: `rotate(${rotation}deg)`, height: '100%', width: '100%' }}
       />
     </div>
   );
