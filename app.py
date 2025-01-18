@@ -1,10 +1,20 @@
 import base64
-from flask import Flask, jsonify, request
+from flask import Flask, Response, jsonify, request
+from flask_cors import CORS
 from emotionsFunction import angry, gen_remark, happy, sad, unangry
 from main2 import get_current_emotion, get_prev_emotion
 import numpy
 import json
 app = Flask(__name__)
+
+CORS(app)
+
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        res = Response()
+        res.headers['X-Content-Type-Options'] = '*'
+        return res
 
 # get image
 @app.route('/detect', methods=['POST'])
