@@ -11,7 +11,7 @@ emotion_counter = defaultdict(int)  # Track emotions in the current interval
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # Start capturing video
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 while True:
     # Capture frame-by-frame
@@ -26,8 +26,7 @@ while True:
     # Detect faces in the frame
     faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-    for face in faces:
-        print(face)
+    print(enumerate(faces))
 
     for (x, y, w, h) in faces:
         # Extract the face ROI (Region of Interest)
