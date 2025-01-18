@@ -25,7 +25,7 @@ def detect():
         case "sad":
             sad()
 
-    remark = gen_remark(current_emotion)
+    remark = gen_remark(current_emotion, frame_data)
 
     return {"emotion": current_emotion, "remark": remark}
 

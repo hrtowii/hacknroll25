@@ -114,7 +114,7 @@ async def handle_emotion(most_common_emotion, prev_emotion, frame):
     global current_emotion
     if most_common_emotion == "angry":
         print("angry")
-        cv2.imwrite('assets/tempimg.png', frame)
+        cv2.imwrite('tempimg.png', frame)
         angry()
     elif prev_emotion == "angry":
         print("unangry")

@@ -73,8 +73,9 @@ function App() {
     });
 
     const data = await response.json();
+    console.log(data)
     setEmotion(data.emotion);
-    setDrowsiness(data.drowsiness);
+    // setDrowsiness(data.drowsiness);
 
     // Append the emotion and remark to the chat messages
     setMessages(prev => [

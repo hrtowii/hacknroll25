@@ -45,7 +45,7 @@ def unsleepy():
 def sad():
     subprocess.run(['sh', './scripts/sad/sad.sh'])
 
-def gen_remark(emotion):
+def gen_remark(emotion, image_data):
     completion = client.chat.completions.create(
         model="meta-llama/llama-3.2-11b-vision-instruct:free",
         messages=[
@@ -59,7 +59,7 @@ def gen_remark(emotion):
                     {
                         "type": "image_url",
                         "image_url": {
-                            "url": f"data:image/jpeg;base64,{encode_image('assets/tempimg.png')}"
+                            "url": f"data:image/jpeg;base64,{image_data}"
                         }
                     }
                 ]
