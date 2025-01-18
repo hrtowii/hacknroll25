@@ -1,0 +1,1 @@
+emotions = ['anger', 'disgust', 'fear', 'happiness', 'sadness', 'surprise']
