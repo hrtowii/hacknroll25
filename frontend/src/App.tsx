@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { NextUIProvider, Card, Button, Input, Spacer } from "@nextui-org/react";
+import { NextUIProvider, Button, Input, Spacer } from "@nextui-org/react";
 import { Send } from 'lucide-react';
 import { ChatMessage } from './components/Chat';
-import { WebcamCapture } from './components/WebcamCapture';
-import Webcam from 'react-webcam';
 import Duck from './components/Duck';
 
 interface Message {
@@ -20,7 +18,7 @@ function App() {
   const [inputMessage, setInputMessage] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false); // Track whether capturing is active
-  const webcamRef = useRef<Webcam>(null);
+  const webcamRef = useRef<any>(null);
 
   // Capture function to get screenshot from webcam
   const capture = useCallback(() => {
@@ -36,11 +34,9 @@ function App() {
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
 
-
     timer = setInterval(() => {
       capture();
     }, 5000); // Capture every 5 seconds
-
 
     return () => {
       if (timer) {
@@ -92,64 +88,37 @@ function App() {
 
   return (
     <NextUIProvider>
-      <div className="min-h-screen bg-gradient-to-br from-yellow-500 to-orange-800 p-4">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="md:col-span-2 bg-white rounded-2xl p-4 shadow-lg flex flex-col h-[80vh]">
-            <div className="flex-1 overflow-y-auto space-y-4 p-4">
-              {messages.map((message, index) => (
-                <ChatMessage key={index} message={message.text} isAI={message.isAI} />
-              ))}
-            </div>
-            <div className="p-4 border-t">
-              <div className="flex gap-2">
-                <Input
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Type your message..."
-                  endContent={
-                    <Button
-                      isIconOnly
-                      color="primary"
-                      variant="flat"
-                      onPress={handleSendMessage}
-                    >
-                      <Send size={20} />
-                    </Button>
-                  }
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col gap-4">
-            <Card style={{ width: '300px', padding: '20px' }}>
-              <Webcam
-                audio={false}
-                mirrored={true}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-                className="rounded-lg w-full"
-              />
-              {image && (
-                <div>
-                  <h4>Captured Image:</h4>
-                  <img src={image} alt="Captured" style={{ width: '100%', marginTop: '10px' }} />
-                </div>
-              )}
-              <Spacer y={1} />
-              <Button onClick={analyzeImage}>Analyze Emotion</Button>
-              <Spacer y={1} />
-              <Button onClick={roastUser}>Roast Me</Button>
-            </Card>
-            <div className="bg-white rounded-2xl p-4 shadow-lg">
-              <h3 className="text-lg font-semibold mb-2">Current Emotion</h3>
-              <p className="text-gray-600">{emotion || 'Waiting for emotion detection...'}</p>
-            </div>
-            <Duck emotion={emotion} />
-          </div>
+  <div className="min-h-screen bg-gradient-to-br from-yellow-500 to-orange-800 p-4">
+    <div className="flex flex-col items-center gap-4">
+      {/* Duck Component */}
+      <Duck emotion={emotion} />
+
+      {/* Message Area */}
+      <div className="bg-white rounded-2xl p-4 shadow-lg flex flex-col w-full">
+        <div className="flex-1 overflow-y-auto space-y-4 p-4">
+          {messages.map((message, index) => (
+            <ChatMessage key={index} message={message.text} isAI={message.isAI} />
+          ))}
         </div>
       </div>
-    </NextUIProvider>
+
+      {/* Buttons to Analyze Image and Roast */}
+      <div className="flex flex-col gap-4 w-full mt-4">
+        <Button onClick={analyzeImage} className="w-full">Analyze Emotion</Button>
+        <Button onClick={roastUser} className="w-full">Roast Me</Button>
+      </div>
+
+      {/* Emotion Display */}
+      <div className="bg-white rounded-2xl p-4 shadow-lg w-full mt-4">
+        <h3 className="text-lg font-semibold mb-2">Current Emotion</h3>
+        <p className="text-gray-600">{emotion || 'Waiting for emotion detection...'}</p>
+      </div>
+    </div>
+  </div>
+</NextUIProvider>
+
+
+
   );
 }
 
