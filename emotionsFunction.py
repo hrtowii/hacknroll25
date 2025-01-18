@@ -17,3 +17,6 @@ def sleepy():
 
 def unsleepy():
     subprocess.run(['sh', './scripts/sleepy/unsleepy.sh'])
+
+def sad():
+    subprocess.run(['sh', './scripts/sad/sad.sh'])
