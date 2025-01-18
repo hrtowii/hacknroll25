@@ -10,3 +10,5 @@ else
     path="./assets/images/sad/sad3.jpg"
 fi
 display -resize '50%' $path &
+
+play ./assets/music/sad.mp3

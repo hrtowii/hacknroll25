@@ -20,7 +20,7 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 def happy():
-    subprocess.Popen('firefox https://www.complex.com/tag/sad ', shell=True)
+    subprocess.run(['sh', './scripts/happy/happy.sh'])
 
 def angry():
     command = './scripts/angry/scramble.sh'
@@ -28,6 +28,8 @@ def angry():
 
     cmd1 = subprocess.Popen(['echo',sudo_password], stdout=subprocess.PIPE)
     cmd2 = subprocess.Popen(['sudo','-S'] + command, stdin=cmd1.stdout, stdout=subprocess.PIPE)
+
+    subprocess.run(['sh', './scripts/angry/angrysound.sh'])
 
 def unangry():
     command = './scripts/angry/unscramble.sh'

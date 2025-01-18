@@ -28,6 +28,8 @@ def detect():
             unangry()
         case "fear":
             unsleepy()
+        case "surprise":
+            unsleepy()
 
     match current_emotion:
         case "angry":
@@ -37,6 +39,8 @@ def detect():
         case "sad":
             sad()
         case "fear":
+            sleepy()
+        case "surprise":
             sleepy()
 
     remark = gen_remark(current_emotion, frame_data)
