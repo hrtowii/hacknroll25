@@ -13,9 +13,9 @@ export const WebcamCapture: React.FC<WebcamCaptureProps> = ({ webcamRef, onEmoti
       <Webcam
         audio={false}
         ref={webcamRef}
-        screenshotFormat="image/jpeg"
-        width={640}
-        height={480}
+        screenshotFormat="image/Sjpeg"
+        width={1920}
+        height={1080}
       />
     </Card>
   );
