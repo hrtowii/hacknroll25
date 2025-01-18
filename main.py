@@ -3,6 +3,12 @@ import time
 from deepface import DeepFace
 from collections import defaultdict
 from emotionsFunction import happy, angry, unangry
+from dotenv import load_dotenv
+import os
+import base64
+
+from texttospeech import speak_text
+load_dotenv()
 # Initialize variables
 last_t = time.time()  # Track the start time of the interval
 emotion_counter = defaultdict(int)  # Track emotions in the current interval
@@ -12,7 +18,18 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fronta
 
 # Start capturing video
 cap = cv2.VideoCapture(1)
+from openai import OpenAI
 
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+if os.getenv("OPENROUTER_KEY") is None:
+    raise ValueError("Please set the OPENROUTER_KEY environment variable")
+client = OpenAI(
+  base_url="https://openrouter.ai/api/v1",
+  api_key=os.getenv("OPENROUTER_KEY"),
+)
 while True:
     # Capture frame-by-frame
     ret, frame = cap.read()
@@ -56,6 +73,35 @@ while True:
             print(f"Most common emotion in the last 5 seconds: {most_common_emotion}")
             if most_common_emotion == "angry":
                 print("angry")
+                # take webcam screenshot, send to image vlm model and generate a snarky comment
+                # run through kokorotts and speak the audio file
+                cv2.imwrite('assets/tempimg.png', frame)
+
+
+                completion = client.chat.completions.create(
+                  model="meta-llama/llama-3.2-11b-vision-instruct:free",
+                  messages=[
+                    {
+                      "role": "user",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Generate a roast of the person in the image that is meant to be spoken out loud. Do not hold back, be as mean as possible! Keep it concise and short, spoken within 10 seconds."
+                        },
+                        {
+                          "type": "image_url",
+                          "image_url": {
+                              "url":  f"data:image/jpeg;base64,{encode_image('assets/tempimg.png')}"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                )
+                print(completion.choices[0].message.content)
+                if completion.choices[0].message.content != "":
+                    audio = f'''{completion.choices[0].message.content}'''
+                    speak_text(audio)
                 angry()
             elif prev_emotion == "angry":
                 print("unangry")
