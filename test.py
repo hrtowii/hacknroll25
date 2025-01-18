@@ -1,5 +1,10 @@
 import time
+import emotionsFunction
 
-while True:
-    print('hi')
-    time.sleep(1)
+print("angry")
+emotionsFunction.angry()
+
+time.sleep(10)
+
+print("unangry")
+emotionsFunction.unangry()

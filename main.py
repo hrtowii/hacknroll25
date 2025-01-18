@@ -1,6 +1,11 @@
 import cv2
+import time
 from deepface import DeepFace
+from emotionsFunction import happy
 
+timer = 0
+last_t = 0
+last_emo = ""
 # Load face cascade classifier
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
@@ -30,6 +35,18 @@ while True:
 
         # Determine the dominant emotion
         emotion = result[0]['dominant_emotion']
+        if last_emo == emotion:
+            now = time.time()
+            dt = now - last_t
+            timer += dt
+            last_t = now
+        elif timer > 5:
+            print("Send command")
+        else:
+            timer = 0
+            last_t = now
+            last_emo = emotion
+
 
         # Draw rectangle around face and label with predicted emotion
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
