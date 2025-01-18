@@ -14,10 +14,12 @@ const Duck = ({ emotion }: DuckProps) => {
     return () => clearInterval(interval);
   }, []);
 
+let assets = ['./assets/images/logo.png','./assets/images/angrylogo.png','./assets/images/happylogo.png','./assets/images/sadlogo.png']
   return (
     <div style={{ width: '45px', height: '45px', overflow: 'hidden' }}>
       <img
-        src={`./assets/images/logo.png`}
+        src={emotion == 'neutral'?assets[0]:emotion == 'angry'?assets[1]:emotion == 'happy'?assets[2]:emotion == 'sad'?assets[3]:assets[0]}
+            
         alt="Duck"
         style={{ transform: `rotate(${rotation}deg)`, height: '100%', width: '100%' }}
       />
