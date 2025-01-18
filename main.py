@@ -43,11 +43,19 @@ while True:
 
     # Check if 5 seconds have passed
     now = time.time()
+    prev_emotion = ""
     if now - last_t >= 5:
         # Find the most common emotion in the last 5 seconds
         if emotion_counter:
             most_common_emotion = max(emotion_counter, key=emotion_counter.get)
             print(f"Most common emotion in the last 5 seconds: {most_common_emotion}")
+            if most_common_emotion == "angry":
+                angry()
+            elif prev_emotion == "angry":
+                unangry()
+            if most_common_emotion == "happy":
+                happy()
+            prev_emotion = most_common_emotion
 
         # Reset the emotion counter and timer for the next interval
         emotion_counter = defaultdict(int)
