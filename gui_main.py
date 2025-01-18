@@ -15,6 +15,18 @@ if __name__ == "__main__":
         initial_delay=1000,
         get_new_text_callback=get_new_text_callback,
         image_path='/Users/ibarahime/dev/hacknroll25/assets/images/logo.png',  # Specify image path
-        image_size=(150, 150)  # Specify image size
+        image_size=(100, 100)  # Specify image size
     )
     overlay.run()
+
+# from tkinter import *
+
+# win = Tk()
+
+# photoimage = PhotoImage(file="assets/logo.png")
+
+# width, height = photoimage.width(), photoimage.height()
+# label = Label(win, bg="blue", width=width, height=height, image=photoimage)
+# label.pack()
+
+# win.mainloop()
