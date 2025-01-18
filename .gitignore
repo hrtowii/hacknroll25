@@ -2,3 +2,7 @@ include
 lib
 bin
 __pycache__/
+.env
+tempimg.png
+temp.mp3
+*.pyc
