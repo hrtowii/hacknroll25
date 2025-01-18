@@ -1,3 +1,5 @@
+# RUN HAPPY WHEN THE DETECTED EXPN IS HAPPY
+# RUN UNHAPPY WHEN IT GETS BACK TO NORMAL, etc.
 import subprocess
 
 def happy():
@@ -9,3 +11,9 @@ def angry():
 
 def unangry():
     subprocess.run(['sudo', './scripts/angry/unscramble.sh'])
+
+def sleepy():
+    subprocess.run(['./scripts/sleepy/sleepy.sh'])
+
+def unsleepy():
+    subprocess.run(['./scripts/sleepy/unsleepy.sh'])

@@ -25,6 +25,8 @@ while True:
 
     # Detect faces in the frame
     faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    for face in faces:
+
 
     for (x, y, w, h) in faces:
         # Extract the face ROI (Region of Interest)

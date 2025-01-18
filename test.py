@@ -1,10 +1,10 @@
 import time
 import emotionsFunction
 
-print("angry")
-emotionsFunction.angry()
+print("sleepy")
+emotionsFunction.sleepy()
 
 time.sleep(10)
 
-print("unangry")
-emotionsFunction.unangry()
+print("unsleepy")
+emotionsFunction.unsleepy()
