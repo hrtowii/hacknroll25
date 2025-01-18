@@ -45,7 +45,7 @@ async def detect_emotion(frame):
 
     for (x, y, w, h) in faces:
         face_roi = rgb_frame[y:y + h, x:x + w]
-        result = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False)
+        result = DeepFace.analyze(face_roi, actions=['emotion'], enforce_detection=False, detector_backend="yolov8")
         emotion = result[0]['dominant_emotion']
         emotion_counter[emotion] += 1
 
